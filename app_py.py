@@ -10,11 +10,17 @@ import matplotlib.pyplot as plt
 
 @st.cache_data
 def load_data():
- df = pd.read_csv("cleaned_vehicle_data.csv")
- df["timestamp"] = pd.to_datetime(df["timestamp"])
- return df
+    df = pd.read_csv("cleaned_vehicle_data.csv")
 
-df = load_data()
+    # Auto-detect column containing a time/date
+    for col in df.columns:
+        if "time" in col.lower() or "date" in col.lower():
+            df.rename(columns={col: "timestamp"}, inplace=True)
+            break
+
+    df["timestamp"] = pd.to_datetime(df["timestamp"], errors="coerce")
+    return df
+
 
 # -----------------------------
 
