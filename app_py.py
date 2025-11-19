@@ -8,16 +8,32 @@ import matplotlib.pyplot as plt
 
 # -----------------------------
 
+
 @st.cache_data
 def load_data():
     try:
         df = pd.read_csv("cleaned_vehicle_data.csv")
     except FileNotFoundError:
-        st.error("❌ CSV file not found. Make sure cleaned_vehicle_data.csv is uploaded to Streamlit.")
-        return pd.DataFrame()
-
+        st.error("❌ CSV not found. Upload cleaned_vehicle_data.csv to Streamlit Cloud.")
+        return None
+    
+    if "timestamp" not in df.columns:
+        st.error("❌ 'timestamp' column not found in CSV!")
+        st.write("Available columns:", list(df.columns))
+        return None
+    
     df["timestamp"] = pd.to_datetime(df["timestamp"], errors="coerce")
     return df
+
+
+df = load_data()
+
+# Stop execution if dataset failed to load
+if df is None:
+    st.stop()
+
+st.write("Dataset loaded successfully!")
+st.write("Shape:", df.shape)
 
 
 
