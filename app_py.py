@@ -31,7 +31,7 @@ def load_data():
         st.write("Available columns:", list(df.columns))
         return None
 
-    # Ensure timestamp is datetime
+    # Convert timestamp column to datetime
     df["timestamp"] = pd.to_datetime(df["timestamp"], errors="coerce")
     if df["timestamp"].isnull().all():
         st.error("❌ All timestamp values are missing or invalid!")
@@ -40,7 +40,6 @@ def load_data():
 
 df = load_data()
 
-# Stop execution if dataset failed to load
 if df is None:
     st.stop()
 
@@ -58,10 +57,9 @@ st.write("Analyze driving behavior, engine performance & vehicle health.")
 # -----------------------------
 st.sidebar.header("Filters")
 
-# Filter only valid timestamps
+# Filter out rows with invalid timestamps
 df = df[df["timestamp"].notnull()]
 
-# Safety: Only run if sufficient data
 if df.empty:
     st.error("❌ Dataset has no valid rows after filtering!")
     st.stop()
@@ -69,16 +67,20 @@ if df.empty:
 min_time = df["timestamp"].min()
 max_time = df["timestamp"].max()
 
+# Convert pandas Timestamps to native Python datetime for Streamlit slider
+min_time_py = min_time.to_pydatetime()
+max_time_py = max_time.to_pydatetime()
+
 time_range = st.sidebar.slider(
     "Select Time Range",
-    min_value=min_time,
-    max_value=max_time,
-    value=(min_time, max_time)
+    min_value=min_time_py,
+    max_value=max_time_py,
+    value=(min_time_py, max_time_py)
 )
 
 df_f = df[(df["timestamp"] >= time_range[0]) & (df["timestamp"] <= time_range[1])]
 
-# Safety: Check for required columns in filtered set
+# Ensure required columns exist before analysis
 required_columns = ["speed", "rpm", "fuel_level", "coolant_temp"]
 missing_cols = [col for col in required_columns if col not in df_f.columns]
 if missing_cols:
@@ -91,11 +93,9 @@ if missing_cols:
 st.subheader("📊 Key Metrics")
 col1, col2, col3 = st.columns(3)
 
-# Guard: ensure enough data for metrics
 if not df_f.empty:
     col1.metric("Average Speed (km/h)", f"{df_f['speed'].mean():.2f}")
     col2.metric("Max RPM", f"{df_f['rpm'].max():.0f}")
-    # Calculate fuel used only if two points exist
     if len(df_f["fuel_level"]) > 1:
         fuel_used = df_f["fuel_level"].iloc[0] - df_f["fuel_level"].iloc[-1]
         col3.metric("Fuel Used (%)", f"{fuel_used:.2f}")
@@ -109,9 +109,7 @@ else:
 # -----------------------------
 # Visualizations
 # -----------------------------
-# Protect against plotting with empty data
 if not df_f.empty:
-
     st.subheader("📈 Speed Over Time")
     fig1, ax1 = plt.subplots(figsize=(10,4))
     ax1.plot(df_f["timestamp"], df_f["speed"])
@@ -147,7 +145,7 @@ else:
     st.warning("Not enough data to display visualizations.")
 
 # -----------------------------
-# Phase 3 – Intelligent Analytics
+# Intelligent Analytics
 # -----------------------------
 st.subheader("🧠 Intelligent Analytics")
 
@@ -166,14 +164,13 @@ if not df_f.empty:
 
     st.write(f"**Driving Behavior Score:** {driving_score}")
 
-    # Engine temp spikes
     spikes = df_f[df_f["coolant_temp"] > 95]
     st.write(f"**Engine Temperature Spikes:** {len(spikes)} detected")
 else:
     st.write("No analytics available for empty filter/data.")
 
 # -----------------------------
-# Phase 4 – Alerts
+# Alerts
 # -----------------------------
 st.subheader("🚨 Alerts")
 
@@ -196,4 +193,3 @@ else:
 
 st.write("---")
 st.write("Made with ❤️ using Streamlit.")
-
