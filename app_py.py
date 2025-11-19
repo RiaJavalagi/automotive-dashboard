@@ -10,18 +10,15 @@ import matplotlib.pyplot as plt
 
 @st.cache_data
 def load_data():
-    df = pd.read_csv("cleaned_vehicle_data.csv")
+    try:
+        df = pd.read_csv("cleaned_vehicle_data.csv")
+    except FileNotFoundError:
+        st.error("❌ CSV file not found. Make sure cleaned_vehicle_data.csv is uploaded to Streamlit.")
+        return pd.DataFrame()
 
-    # Auto-detect timestamp column
-    time_cols = [c for c in df.columns if c.lower().strip() == "timestamp"]
-
-    if len(time_cols) == 1:
-        df.rename(columns={time_cols[0]: "timestamp"}, inplace=True)
-        df["timestamp"] = pd.to_datetime(df["timestamp"], errors="coerce")
-    else:
-        st.error("❌ No valid timestamp column found in dataset")
-
+    df["timestamp"] = pd.to_datetime(df["timestamp"], errors="coerce")
     return df
+
 
 
 
