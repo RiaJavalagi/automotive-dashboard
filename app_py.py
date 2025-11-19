@@ -12,14 +12,24 @@ import matplotlib.pyplot as plt
 def load_data():
     df = pd.read_csv("cleaned_vehicle_data.csv")
 
-    # Auto-detect column containing a time/date
+    # Show columns to debug
+    st.write("Columns in dataset:", df.columns.tolist())
+
+    # Try to detect a time column
+    time_col = None
     for col in df.columns:
         if "time" in col.lower() or "date" in col.lower():
-            df.rename(columns={col: "timestamp"}, inplace=True)
+            time_col = col
             break
 
-    df["timestamp"] = pd.to_datetime(df["timestamp"], errors="coerce")
+    if time_col:
+        df.rename(columns={time_col: "timestamp"}, inplace=True)
+        df["timestamp"] = pd.to_datetime(df["timestamp"], errors="coerce")
+    else:
+        st.warning("⚠ No timestamp column found; time filtering disabled.")
+
     return df
+
 
 
 # -----------------------------
