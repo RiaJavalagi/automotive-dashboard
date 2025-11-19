@@ -167,3 +167,27 @@ else:
 
 st.write("---")
 st.write("Made with ❤️ using Streamlit.")
+# -----------------------------
+# Safe Time Filtering
+# -----------------------------
+
+if "timestamp" in df.columns:
+    df["timestamp"] = pd.to_datetime(df["timestamp"], errors="coerce")
+    min_time = df["timestamp"].min()
+    max_time = df["timestamp"].max()
+
+    time_range = st.sidebar.slider(
+        "Select Time Range",
+        min_value=min_time,
+        max_value=max_time,
+        value=(min_time, max_time)
+    )
+
+    df_f = df[
+        (df["timestamp"] >= time_range[0]) &
+        (df["timestamp"] <= time_range[1])
+    ]
+else:
+    st.sidebar.warning("⚠ No timestamp column found — time filter disabled.")
+    df_f = df.copy()
+
