@@ -11,7 +11,7 @@ import numpy as np
 
 @st.cache_data
 def load_data():
-import os
+ import os
 
 ```
 # Works both locally and Streamlit Cloud
