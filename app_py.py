@@ -21,7 +21,7 @@ def load_data():
     df["timestamp"] = pd.to_datetime(df["timestamp"])
     return df
 
-df = load_data()
+
 
     # Normalize column names: strip whitespace
     df.columns = [c.strip() for c in df.columns]
