@@ -86,6 +86,16 @@ ax4.set_xlabel("Speed")
 ax4.set_ylabel("RPM")
 ax4.grid(True)
 st.pyplot(fig4)
+# -----------------------------
+# Map Visualization 
+# -----------------------------
+st.subheader("🗺️ GPS Position Map")
+
+if "latitude" in df_f.columns and "longitude" in df_f.columns:
+    st.map(df_f[["latitude", "longitude"]])
+else:
+    st.info("⚠️ GPS coordinates not available in this dataset.")
+
 
 # -----------------------------
 # Phase 3 – Intelligent Analytics
