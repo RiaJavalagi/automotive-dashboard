@@ -1,37 +1,29 @@
 import streamlit as st
 import pandas as pd
 import matplotlib.pyplot as plt
-import numpy as np
-import os
 
-# ----------------------------------
+# -----------------------------
 # Load Dataset
-# ----------------------------------
+# -----------------------------
 
 @st.cache_data
 def load_data():
-    # Works both locally and Streamlit Cloud
-    if os.path.exists("cleaned_vehicle_data.csv"):
-        df = pd.read_csv("cleaned_vehicle_data.csv")
-    else:
-        df = pd.read_csv("/mnt/data/cleaned_vehicle_data.csv")
-
+    df = pd.read_csv("cleaned_vehicle_data.csv")
     df["timestamp"] = pd.to_datetime(df["timestamp"])
     return df
 
 df = load_data()
 
-# ----------------------------------
+# -----------------------------
 # Dashboard Title
-# ----------------------------------
+# -----------------------------
 
-st.set_page_config(page_title="Automotive Intelligence", layout="wide")
 st.title("🚗 Automotive Data Intelligence Dashboard")
 st.write("Analyze driving behavior, engine performance & vehicle health.")
 
-# ----------------------------------
+# -----------------------------
 # Sidebar Filters
-# ----------------------------------
+# -----------------------------
 
 st.sidebar.header("Filters")
 
@@ -47,79 +39,69 @@ time_range = st.sidebar.slider(
 
 df_f = df[(df["timestamp"] >= time_range[0]) & (df["timestamp"] <= time_range[1])]
 
-# ----------------------------------
-# KPI Metrics
-# ----------------------------------
+# -----------------------------
+# KPI Cards
+# -----------------------------
 
 st.subheader("📊 Key Metrics")
 
-avg_speed = df_f["speed"].mean()
-max_rpm = df_f["rpm"].max()
-fuel_used = df_f["fuel_level"].iloc[0] - df_f["fuel_level"].iloc[-1]
-
 col1, col2, col3 = st.columns(3)
-col1.metric("Average Speed", f"{avg_speed:.2f} km/h")
-col2.metric("Max RPM", f"{max_rpm:.0f}")
-col3.metric("Fuel Consumed", f"{fuel_used:.2f} %")
 
-# ----------------------------------
-# Time-Series Visualizations
-# ----------------------------------
+col1.metric("Average Speed (km/h)", f"{df_f['speed'].mean():.2f}")
+col2.metric("Max RPM", f"{df_f['rpm'].max():.0f}")
+col3.metric("Fuel Used (%)", f"{df_f['fuel_level'].iloc[0] - df_f['fuel_level'].iloc[-1]:.2f}")
 
-st.subheader("📈 Driving and Engine Performance")
+# -----------------------------
+# Visualizations
+# -----------------------------
 
-# Speed
-fig1, ax1 = plt.subplots(figsize=(10, 3))
+st.subheader("📈 Speed Over Time")
+fig1, ax1 = plt.subplots(figsize=(10, 4))
 ax1.plot(df_f["timestamp"], df_f["speed"])
 ax1.set_xlabel("Time")
 ax1.set_ylabel("Speed (km/h)")
 ax1.grid(True)
 st.pyplot(fig1)
 
-# Coolant Temperature
-fig2, ax2 = plt.subplots(figsize=(10, 3))
+st.subheader("🌡 Coolant Temperature Over Time")
+fig2, ax2 = plt.subplots(figsize=(10, 4))
 ax2.plot(df_f["timestamp"], df_f["coolant_temp"], color="red")
 ax2.set_xlabel("Time")
 ax2.set_ylabel("Coolant Temp (°C)")
 ax2.grid(True)
 st.pyplot(fig2)
 
-# Fuel Level
-fig3, ax3 = plt.subplots(figsize=(10, 3))
+st.subheader("⛽ Fuel Level Trend")
+fig3, ax3 = plt.subplots(figsize=(10, 4))
 ax3.plot(df_f["timestamp"], df_f["fuel_level"], color="green")
 ax3.set_xlabel("Time")
 ax3.set_ylabel("Fuel Level (%)")
 ax3.grid(True)
 st.pyplot(fig3)
 
-# ----------------------------------
-# Scatter Plot
-# ----------------------------------
-
-st.subheader("⚙️ RPM vs Speed")
-fig4, ax4 = plt.subplots(figsize=(6, 4))
-ax4.scatter(df_f["speed"], df_f["rpm"], s=12)
+st.subheader("⚙️ RPM vs Speed Scatter")
+fig4, ax4 = plt.subplots(figsize=(7, 5))
+ax4.scatter(df_f["speed"], df_f["rpm"], s=10)
 ax4.set_xlabel("Speed")
 ax4.set_ylabel("RPM")
 ax4.grid(True)
 st.pyplot(fig4)
-
-# ----------------------------------
-# GPS Map
-# ----------------------------------
-
-st.subheader("🗺 Vehicle Movement Map")
+# -----------------------------
+# Map Visualization 
+# -----------------------------
+st.subheader("🗺️ GPS Position Map")
 
 if "latitude" in df_f.columns and "longitude" in df_f.columns:
     st.map(df_f[["latitude", "longitude"]])
 else:
-    st.info("⚠️ GPS data not found.")
+    st.info("⚠️ GPS coordinates not available in this dataset.")
 
-# ----------------------------------
-# Intelligent Analytics
-# ----------------------------------
 
-st.subheader("🧠 Smart Analytics")
+# -----------------------------
+# Phase 3 – Intelligent Analytics
+# -----------------------------
+
+st.subheader("🧠 Intelligent Analytics")
 
 speed_var = df_f["speed"].std()
 acceleration = df_f["speed"].diff().abs().mean()
@@ -133,51 +115,34 @@ else:
 
 st.write(f"**Driving Behavior Score:** {driving_score}")
 
-temp_spikes = df_f[df_f["coolant_temp"] > 95]
-st.write(f"**Engine Temperature Spikes:** {len(temp_spikes)} detected")
+spikes = df_f[df_f["coolant_temp"] > 95]
+st.write(f"**Engine Temperature Spikes:** {len(spikes)} detected")
 
-# ----------------------------------
-# Machine Learning – Predictive Stub (Extend Later)
-# ----------------------------------
-
-st.subheader("🤖 ML Prediction (Prototype)")
-
-st.write("Model could predict:")
-st.write("- Component failure risk")
-st.write("- Fuel efficiency trend")
-st.write("- Driver safety rating")
-
-st.info("ML model integration placeholder – ready for future enhancement.")
-
-# ----------------------------------
-# Alerts
-# ----------------------------------
+# -----------------------------
+# Phase 4 – Alerts
+# -----------------------------
 
 st.subheader("🚨 Alerts")
 
 alerts = []
 
 if df_f["coolant_temp"].max() > 100:
-    alerts.append("🔥 **High engine temperature detected!**")
+    alerts.append("🔥 High Coolant Temperature!")
 
 if df_f["speed"].max() > 120:
-    alerts.append("⚠️ **Overspeeding detected.**")
+    alerts.append("⚠️ Overspeeding Detected")
 
 if df_f["rpm"].max() > 4500:
-    alerts.append("⚙️ **High RPM – aggressive driving.**")
+    alerts.append("⚙️ High RPM – Aggressive Driving")
 
 if df_f["fuel_level"].iloc[-1] < 15:
-    alerts.append("⛽ **Low fuel warning.**")
+    alerts.append("⛽ Low Fuel Warning")
 
-if alerts:
+if len(alerts) == 0:
+    st.success("No alerts! Everything looks normal.")
+else:
     for alert in alerts:
         st.error(alert)
-else:
-    st.success("No alerts – vehicle operating normally.")
-
-# ----------------------------------
-# Footer
-# ----------------------------------
 
 st.write("---")
 st.write("Made with ❤️ using Streamlit.")
