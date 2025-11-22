@@ -13,7 +13,7 @@ import numpy as np
 def load_data():
  import os
 
-```
+
 # Works both locally and Streamlit Cloud
 if os.path.exists("cleaned_vehicle_data.csv"):
     df = pd.read_csv("cleaned_vehicle_data.csv")
