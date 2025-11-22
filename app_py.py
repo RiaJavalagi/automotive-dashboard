@@ -131,9 +131,9 @@ st.pyplot(fig4)
 st.subheader("🗺 Vehicle Movement Map")
 
 if "latitude" in df_f.columns and "longitude" in df_f.columns:
-st.map(df_f[["latitude", "longitude"]])
+ st.map(df_f[["latitude", "longitude"]])
 else:
-st.info("⚠️ GPS data not found.")
+ st.info("⚠️ GPS data not found.")
 
 # ----------------------------------
 
@@ -147,11 +147,11 @@ speed_var = df_f["speed"].std()
 acceleration = df_f["speed"].diff().abs().mean()
 
 if speed_var < 5 and acceleration < 2:
-driving_score = "Excellent"
+ driving_score = "Excellent"
 elif speed_var < 10:
-driving_score = "Good"
+ driving_score = "Good"
 else:
-driving_score = "Poor"
+ driving_score = "Poor"
 
 st.write(f"**Driving Behavior Score:** {driving_score}")
 
@@ -184,22 +184,22 @@ st.subheader("🚨 Alerts")
 alerts = []
 
 if df_f["coolant_temp"].max() > 100:
-alerts.append("🔥 **High engine temperature detected!**")
+ alerts.append("🔥 **High engine temperature detected!**")
 
 if df_f["speed"].max() > 120:
-alerts.append("⚠️ **Overspeeding detected.**")
+ alerts.append("⚠️ **Overspeeding detected.**")
 
 if df_f["rpm"].max() > 4500:
-alerts.append("⚙️ **High RPM – aggressive driving.**")
+ alerts.append("⚙️ **High RPM – aggressive driving.**")
 
 if df_f["fuel_level"].iloc[-1] < 15:
-alerts.append("⛽ **Low fuel warning.**")
+ alerts.append("⛽ **Low fuel warning.**")
 
 if alerts:
-for alert in alerts:
-st.error(alert)
+ for alert in alerts:
+  st.error(alert)
 else:
-st.success("No alerts – vehicle operating normally.")
+ st.success("No alerts – vehicle operating normally.")
 
 # ----------------------------------
 
