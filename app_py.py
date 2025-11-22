@@ -22,7 +22,7 @@ else:
 
 df["timestamp"] = pd.to_datetime(df["timestamp"])
 return df
-```
+
 
 df = load_data()
 
