@@ -14,17 +14,14 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# ---------- Constants ----------
-DEFAULT_CSV_PATH = "/mnt/data/cleaned_vehicle_data.csv"  # <-- the uploaded file path
-
 # ---------- Helpers ----------
 @st.cache_data
-def load_dataset(path: str):
-    """Load CSV safely and auto-detect timestamp column."""
-    try:
-        df = pd.read_csv(path)
-    except FileNotFoundError:
-        return None, f"File not found at: {path}"
+def load_data():
+    df = pd.read_csv("/mnt/data/cleaned_vehicle_data.csv")
+    df["timestamp"] = pd.to_datetime(df["timestamp"])
+    return df
+
+df = load_data()
 
     # Normalize column names: strip whitespace
     df.columns = [c.strip() for c in df.columns]
