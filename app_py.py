@@ -3,16 +3,29 @@ import pandas as pd
 import matplotlib.pyplot as plt
 
 # -----------------------------
-# Load Dataset
+# Load Dataset (with upload support)
 # -----------------------------
 
 @st.cache_data
-def load_data():
+def load_default_data():
     df = pd.read_csv("cleaned_vehicle_data.csv")
     df["timestamp"] = pd.to_datetime(df["timestamp"])
     return df
 
-df = load_data()
+st.sidebar.header("📁 Upload Your Data")
+
+uploaded_file = st.sidebar.file_uploader("Upload CSV (Optional)", type=["csv"])
+
+if uploaded_file:
+    df = pd.read_csv(uploaded_file)
+    if "timestamp" not in df.columns:
+        st.error("❌ Uploaded file must contain a 'timestamp' column.")
+        st.stop()
+    df["timestamp"] = pd.to_datetime(df["timestamp"])
+    st.success("✔ Using uploaded file!")
+else:
+    df = load_default_data()
+    st.info("📌 Using default dataset: cleaned_vehicle_data.csv")
 
 # -----------------------------
 # Dashboard Title
@@ -49,7 +62,8 @@ col1, col2, col3 = st.columns(3)
 
 col1.metric("Average Speed (km/h)", f"{df_f['speed'].mean():.2f}")
 col2.metric("Max RPM", f"{df_f['rpm'].max():.0f}")
-col3.metric("Fuel Used (%)", f"{df_f['fuel_level'].iloc[0] - df_f['fuel_level'].iloc[-1]:.2f}")
+col3.metric("Fuel Used (%)", 
+            f"{df_f['fuel_level'].iloc[0] - df_f['fuel_level'].iloc[-1]:.2f}")
 
 # -----------------------------
 # Visualizations
@@ -86,6 +100,7 @@ ax4.set_xlabel("Speed")
 ax4.set_ylabel("RPM")
 ax4.grid(True)
 st.pyplot(fig4)
+
 # -----------------------------
 # Map Visualization 
 # -----------------------------
@@ -95,7 +110,6 @@ if "latitude" in df_f.columns and "longitude" in df_f.columns:
     st.map(df_f[["latitude", "longitude"]])
 else:
     st.info("⚠️ GPS coordinates not available in this dataset.")
-
 
 # -----------------------------
 # Phase 3 – Intelligent Analytics
